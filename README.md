@@ -1,6 +1,6 @@
 # MKS DESAFIO
 
-Este é o README do meu projeto incrível, onde utilizo as seguintes tecnologias e ferramentas:
+Este é o Front-end do desafio, onde utilizo as seguintes tecnologias e ferramentas:
 
 ## Tecnologias Utilizadas
 
