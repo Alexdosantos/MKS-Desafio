@@ -1,95 +1,108 @@
+"use client";
+import { GlobalStyle } from "./globalStyled";
+import * as S from "./pageStyled";
 import Image from "next/image";
-import styles from "./page.module.css";
+import CardLogo from "@/components/CardLogo/CardLogo";
+import CardCountCart from "@/components/CardCountCart/CardCountCart";
+import CardProducts from "@/components/CardProducts/CardProducts";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getProducts } from "@/service/getApi/getApi";
+import GifLoading from "@/assets/loading.gif";
+
+import { useShoppingCart } from "@/hook/useShoppingCart/useShoppingCart";
+
+export interface IProduct {
+  id: number;
+  name: string;
+  brand: string;
+  description: string;
+  photo: string;
+  price: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProductResponse extends IProduct {
+  count: number;
+}
 
 export default function Home() {
+  const [isOpen, setIsOpen] = useState(false);
+  const { cart, addToCart, removeFromCart } = useShoppingCart();
+
+  const { data: products, isLoading } = useQuery<ProductResponse[]>({
+    queryKey: ["getProduct"],
+    queryFn: async () => getProducts(),
+  });
+
+  const handleClick = () => {
+    setIsOpen(true);
+  };
+
+  const handleClickclose = () => {
+    setIsOpen(false);
+  };
+
+  const handleDeleteFromCart = (productId: number) => {
+    removeFromCart(productId);
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <GlobalStyle />
+      {isLoading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <Image src={GifLoading} alt="Product 1" width={150} height={150} />
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      ) : (
+        <>
+          <Sidebar 
+            isOpen={isOpen}
+            onclickClosed={handleClickclose}
+            onclickDelete={(productId) => handleDeleteFromCart(productId)}
+            mapeamento={cart}
+          />
+          <S.Head>
+            <S.Wrapper>
+              <S.DivLogo>
+                <CardLogo />
+              </S.DivLogo>
+              <S.DivCart>
+                <S.DivCountCart>
+                  <CardCountCart
+                    quantityCart={cart.reduce(
+                      (total, item) => total + item.quantity,
+                      0
+                    )}
+                    onclick={handleClick}
+                  />
+                </S.DivCountCart>
+              </S.DivCart>
+            </S.Wrapper>
+          </S.Head>
+          <S.SectionProducts>
+            {products?.map((product) => (
+              <CardProducts
+                key={product.id}
+                name={product.name}
+                urlImage={product.photo} // Usando a URL da imagem
+                description={product.description}
+                price={product.price}
+                onclick={() => addToCart(product)}
+              />
+            ))}
+          </S.SectionProducts>
+        </>
+      )}
+    </>
   );
 }

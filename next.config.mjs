@@ -1,4 +1,10 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+export default {
+    reactStrictMode: true,
+    compiler: {
+      styledComponents: true,
+    },
+    images: {
+      domains: ['mks-sistemas.nyc3.digitaloceanspaces.com'],
+    },
+  };
+  
